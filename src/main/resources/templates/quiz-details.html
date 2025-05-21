@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 1.5rem;
+        }
+        .navbar {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Quiz App</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">All Quizzes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/add-quiz">Add New Quiz</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Quizzes</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${quiz.name}">Quiz Name</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 th:text="${quiz.name}">Quiz Name</h1>
+            <div class="d-flex gap-2">
+                <a th:href="@{/take-quiz/{id}(id=${quiz.id})}" class="btn btn-success" th:if="${!quiz.questions.empty}">Take Quiz</a>
+                <a th:href="@{/quiz/{id}/edit(id=${quiz.id})}" class="btn btn-warning">Edit Quiz</a>
+                <form th:action="@{/quiz/{id}/delete(id=${quiz.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this quiz? This will also delete all questions in this quiz.');">
+                    <button type="submit" class="btn btn-danger">Delete Quiz</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-info" th:if="${quiz.questions.empty}">
+            This quiz doesn't have any questions yet.
+        </div>
+
+        <div class="card mb-4" th:unless="${quiz.questions.empty}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Questions</span>
+                <span class="badge bg-primary" th:text="${quiz.questions.size()}">0</span>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" th:each="question, status : ${quiz.questions}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary me-2" th:text="${status.count}">1</span>
+                            <span th:text="${question.text}">Question text</span>
+                            <small class="text-muted ms-2">
+                                <span class="badge bg-secondary" th:text="${question.category}">Category</span>
+                                <span class="badge bg-info" th:text="${question.difficulty}">Difficulty</span>
+                            </small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/question/{id}/edit(id=${question.id})}" class="btn btn-sm btn-warning">Edit</a>
+                            <form th:action="@{/question/{id}/delete(id=${question.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="ms-4 mt-2" th:if="${!question.options.empty}">
+                        <div class="mb-2 d-flex justify-content-between align-items-center">
+                            <h6>Options</h6>
+                            <a th:href="@{/question/{id}/add-option(id=${question.id})}" class="btn btn-sm btn-success">Add Option</a>
+                        </div>
+                        <div class="ms-2 mb-2" th:each="option, optionStatus : ${question.options}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" disabled
+                                           th:checked="${option.correct}">
+                                    <label class="form-check-label" th:text="${option.text}">
+                                        Option text
+                                    </label>
+                                    <span class="badge bg-success ms-1" th:if="${option.correct}">Correct</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/option/{id}/edit(id=${option.id})}" class="btn btn-sm btn-outline-warning">Edit</a>
+                                    <form th:action="@{/option/{id}/delete(id=${option.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this option?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ms-4 mt-2" th:if="${question.options.empty}">
+                        <div class="alert alert-warning py-2">
+                            No options added yet.
+                            <a th:href="@{/question/{id}/add-option(id=${question.id})}" class="alert-link">Add options</a> to this question.
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a th:href="@{/quiz/{id}/add-question(id=${quiz.id})}" class="btn btn-primary">Add Question</a>
+            <a href="/" class="btn btn-secondary">Back to Quizzes</a>
+        </div>
+
+        <footer class="mt-5 text-center text-muted">
+            <p>&copy; 2025 Quiz App</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

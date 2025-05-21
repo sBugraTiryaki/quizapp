@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 1.5rem;
+        }
+        .navbar {
+            margin-bottom: 2rem;
+        }
+        .question-card {
+            margin-bottom: 1.5rem;
+        }
+        .progress {
+            height: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .quiz-progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Quiz App</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">All Quizzes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/take-quiz">Take Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/add-quiz">Add New Quiz</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Quizzes</a></li>
+                <li class="breadcrumb-item"><a href="/take-quiz">Take Quiz</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Taking Quiz: <span th:text="${quiz.name}">Quiz Name</span></li>
+            </ol>
+        </nav>
+
+        <div class="mb-4">
+            <h1 th:text="${quiz.name}">Quiz Name</h1>
+            <p class="text-muted">Answer all questions and click Submit to see your results.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="quiz-progress-info">
+            <span>Quiz Progress</span>
+            <span><span id="questionsAnswered">0</span>/<span th:text="${quiz.questions.size()}">10</span> Questions</span>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 0%;"
+                 aria-valuenow="0" th:aria-valuemax="${quiz.questions.size()}" aria-valuemin="0">0%</div>
+        </div>
+
+        <form th:action="@{/take-quiz/{id}/submit(id=${quiz.id})}" method="post" id="quizForm">
+            <div th:each="question, status : ${quiz.questions}" class="card question-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Question <span th:text="${status.count}">1</span></h5>
+                    <span class="badge bg-secondary" th:text="${question.category}">Category</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text" th:text="${question.text}">Question text</p>
+
+                    <div class="mt-3">
+                        <div th:if="${question.options.empty}" class="alert alert-warning">
+                            This question has no options.
+                        </div>
+
+                        <div th:unless="${question.options.empty}" class="form-group">
+                            <div class="form-check" th:each="option : ${question.options}">
+                                <input class="form-check-input question-option" type="radio"
+                                       th:name="'question_' + ${question.id}"
+                                       th:id="'option_' + ${option.id}"
+                                       th:value="${option.id}"
+                                       th:attr="data-question-id=${question.id}"
+                                       required>
+                                <label class="form-check-label"
+                                       th:for="'option_' + ${option.id}"
+                                       th:text="${option.text}">Option text</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Submit Answers</button>
+                <a href="/take-quiz" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <footer class="mt-5 text-center text-muted">
+            <p>&copy; 2025 Quiz App</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('quizForm');
+            const progressBar = document.querySelector('.progress-bar');
+            const questionsAnswered = document.getElementById('questionsAnswered');
+            const totalQuestions = parseInt(progressBar.getAttribute('aria-valuemax')) || 0;
+            const answeredQuestions = new Set();
+
+            // Set up event listeners for all radio buttons
+            document.querySelectorAll('.question-option').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    const questionId = this.getAttribute('data-question-id');
+                    answeredQuestions.add(questionId);
+
+                    // Update progress
+                    const numAnswered = answeredQuestions.size;
+                    const percentage = Math.round((numAnswered / totalQuestions) * 100);
+
+                    progressBar.style.width = percentage + '%';
+                    progressBar.setAttribute('aria-valuenow', numAnswered);
+                    progressBar.textContent = percentage + '%';
+                    questionsAnswered.textContent = numAnswered;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

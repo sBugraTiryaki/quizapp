@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select a Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 1.5rem;
+        }
+        .navbar {
+            margin-bottom: 2rem;
+        }
+        .quiz-card {
+            transition: transform 0.2s ease;
+        }
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Quiz App</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">All Quizzes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/take-quiz">Take Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/add-quiz">Add New Quiz</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <h1 class="mb-4">Select a Quiz to Take</h1>
+
+        <div class="alert alert-info" th:if="${quizzes.empty}">
+            No quizzes available. <a href="/add-quiz" class="alert-link">Create one!</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4" th:unless="${quizzes.empty}">
+            <div class="col" th:each="quiz : ${quizzes}" th:if="${!quiz.questions.empty}">
+                <div class="card h-100 quiz-card">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${quiz.name}">Quiz Name</h5>
+                        <p class="card-text">
+                            <span th:text="${quiz.questions.size()}">0</span> questions
+                        </p>
+                        <a th:href="@{/take-quiz/{id}(id=${quiz.id})}" class="btn btn-primary">Start Quiz</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3" th:if="${!quizzes.empty && quizzes.?[!questions.empty].empty}">
+            All available quizzes currently have no questions. You can add questions to quizzes from the <a href="/" class="alert-link">All Quizzes</a> page.
+        </div>
+
+        <footer class="mt-5 text-center text-muted">
+            <p>&copy; 2025 Quiz App</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
